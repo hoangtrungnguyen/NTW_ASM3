@@ -1,4 +1,4 @@
-package client;
+package org.example.client;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -19,16 +19,16 @@ public class Client {
 
             //Lấy chuỗi ký tự nhập từ bàn phím
             while(true){
-                System.out.print("Input from client: ");
+                System.out.print("Input from org.example.client: \n");
                 BufferedReader inFromUser = new BufferedReader(new InputStreamReader(System.in));
                 sentence_to_server = inFromUser.readLine();
+                outToServer.writeBytes(sentence_to_server +"\n" );
+                String message;
+                message = inFromServer.readLine();
+                System.out.println("FROM SERVER: " + message);
 
-                outToServer.writeBytes(sentence_to_server + '\n');
-
-                sentence_from_server = inFromServer.readLine();
-                System.out.println("----- Response -----");
-                System.out.println("FROM SERVER: " + sentence_from_server);
             }
+
         } catch (SocketException socketException){
             System.out.println(socketException.toString());
         } catch (IOException e) {
