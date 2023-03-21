@@ -1,59 +1,58 @@
 package org.example.server;
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 
 public class Server {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
+        ServerSocket serverSocket = null;
+        try {
+            serverSocket = new ServerSocket(8080); // create server socket
+        } catch (IOException e) {
+            System.err.println("Could not listen on port: 8080.");
+            System.exit(1);
+        }
 
+        Socket clientSocket = null;
+        try {
+            clientSocket = serverSocket.accept(); // wait for client connection
+        } catch (IOException e) {
+            System.err.println("Accept failed.");
+            System.exit(1);
+        }
 
+        PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
+        BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
+        String inputLine;
+        while ((inputLine = in.readLine()) != null) {
+            System.out.println("From client: " + inputLine);
 
-                try(ServerSocket welcomeSocket = new ServerSocket(6543)){
+            String[] data = inputLine.split(" ");
+            try {
+                Action action = filterAction(data[0]);
 
-
-
-                    while(true) {
-                        try( Socket connectionSocket = welcomeSocket.accept();
-                             BufferedReader inFromClient = new BufferedReader(new InputStreamReader(connectionSocket.getInputStream()));
-                             DataOutputStream outToClient = new DataOutputStream(connectionSocket.getOutputStream())) {
-                            AuthService service = new AuthService(outToClient);
-
-                            String sentence_to_client;
-                            String sentence_from_client;
-                            if ((sentence_from_client = inFromClient.readLine()) != null) { // listen for messages from the client
-                                sentence_to_client = "Received message from client: " + sentence_from_client;
-                                System.out.println(sentence_to_client);
-
-                                String[] data = sentence_from_client.split(" ");
-
-                                Action action = filterAction(data[0]);
-
-                                if (action == null) {
-                                    sentence_to_client = "Invalid action";
-                                    outToClient.writeBytes(sentence_to_client);
-                                    continue;
-                                }
-                                process(action, service, data[1]);
-                            }
-
-                        }
-
-                    }
-
-                } catch (SocketException socketException){
-                    System.out.println(socketException.toString());
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                } finally {
+                if (action == null) {
+                      out.println("isOk:false,message:invalid action");
+                } else {
+                    process(action, new AuthService(out), data[1]);
                 }
+
+            }catch (IndexOutOfBoundsException exception){
+                out.println(Response.responseFail("Request is not match the format"));
             }
+
+        }
+
+        out.close();
+        in.close();
+        clientSocket.close();
+        serverSocket.close();
+    }
+
 
             public static void process(Action action, AuthService service,String data){
                 switch (action){

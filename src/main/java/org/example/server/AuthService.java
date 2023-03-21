@@ -1,19 +1,19 @@
 package org.example.server;
 
-import org.example.server.exception.InvalidPasswordException;
 import org.example.server.exception.InvalidUserNameException;
 import org.example.server.model.User;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 
 public class AuthService {
 
     boolean isLogin = false;
 
-    String username;
-    DataOutputStream out;
-    public AuthService(DataOutputStream out){
+    User user;
+    PrintWriter out;
+    public AuthService(PrintWriter out){
         this.out = out;
     }
 
@@ -22,55 +22,50 @@ public class AuthService {
     public void checkingUsername(String username){
         try {
             System.out.println("Server username: "+username);
-            this.username = username;
             User user = databaseHelper.getUserByUsername(username);
             if(user == null){
-                out.writeBytes("Not found user");
+                out.println(Response.responseFail("Not found user"));
                 System.out.println("Sent message not foudn");
                 return;
             }
-            out.writeBytes("OKay");
+            this.user = user;
+            out.println(Response.responseOk("User found"));
         } catch (InvalidUserNameException exception){
-            try {
-                out.writeBytes("OKay");
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            out.println("OKay");
         } catch (Exception exception){
-            try {
-                out.writeBytes("not okay");
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            out.println("not okay");
         }
     }
-    public boolean checkPassword(String password) {
+    public void checkPassword(String password) {
         System.out.println("Server password: "+password);
 
         try{
-            User user =  databaseHelper.getUserByUsername(this.username);
-
             if(user.password.equals(password)){
                 isLogin = true;
-                return true;
+                out.println(Response.responseOk("Logged in success"));
             } else {
-                return false;
+                out.println(Response.responseFail("Wrong password"));
             }
-
-        } catch (InvalidUserNameException exception){
-//            helper.sendErrorResponse("Not found user");
         } catch (Exception exception){
-//            helper.sendErrorResponse("Error");
+            out.println(Response.responseFail("Unexpected error"));
         }
-
-        return false;
     }
 
     public void logout() {
-
+       if(user != null && isLogin){
+           user = null;
+           isLogin = false;
+           out.println(Response.responseOk("Log out success"));
+       } else {
+           if(user != null){
+               out.println(Response.responseFail("Current user session hasn't logged in yet"));
+           } else {
+               out.println(Response.responseFail("There is no current user"));
+           }
+       }
     }
 
     public void echo(String message) {
-
+        out.println(Response.responseOk(message));
     }
 }

@@ -13,7 +13,7 @@ import java.util.List;
 
 
 public class DatabaseHelper {
-    static String user_file = "/Users/savvycom/IdeaProjects/NTW_ASM3/src/main/java/org/example/server/sql/user";
+    static String user_file = "G:\\Project\\NTW_ASM3\\src\\main\\java\\org\\example\\server\\user.txt";
     private static DatabaseHelper instance = null;
 
 

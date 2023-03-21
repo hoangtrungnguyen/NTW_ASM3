@@ -1,12 +1,9 @@
-package org.example.client;
+package org.example.test;
 
 import java.io.*;
-import java.net.Socket;
-import java.net.SocketException;
-import java.net.UnknownHostException;
+import java.net.*;
 
-public class Client {
-
+public class TestClient {
     public static void main(String[] args) throws IOException {
 
         Socket socket = null;
