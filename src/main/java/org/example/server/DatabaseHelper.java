@@ -3,17 +3,14 @@ package org.example.server;
 import org.example.server.exception.InvalidUserNameException;
 import org.example.server.model.User;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
 
 
 public class DatabaseHelper {
-    static String user_file = "G:\\Project\\NTW_ASM3\\src\\main\\java\\org\\example\\server\\user.txt";
+    static String user_file = "/user.txt";
     private static DatabaseHelper instance = null;
 
 
@@ -41,7 +38,15 @@ public class DatabaseHelper {
 
     private List<User> getAllUser(){
         List<User> users =  new ArrayList<>();
-        try(BufferedReader reader = new BufferedReader(new FileReader(new File(user_file)));) {
+        // create a class instance to access the resource
+        Class<DatabaseHelper> clazz = DatabaseHelper.class;
+
+        InputStream inputStream = clazz.getResourceAsStream("/user.txt");
+        if(inputStream ==null){
+            System.out.println("can't found user.txt ");
+            return users;
+        }
+        try(BufferedReader reader = new BufferedReader( new InputStreamReader(inputStream))) {
 
             String line = reader.readLine();
             while (line != null) {

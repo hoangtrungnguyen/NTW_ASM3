@@ -31,12 +31,12 @@ public class Server {
         while ((inputLine = in.readLine()) != null) {
             System.out.println("From client: " + inputLine);
 
-            String[] data = inputLine.split(" ");
+            String[] data = inputLine.split(",");
             try {
                 Action action = filterAction(data[0]);
 
                 if (action == null) {
-                      out.println("isOk:false,message:invalid action");
+                      out.println(Response.responseFail("Invalid action"));
                 } else {
                     process(action, new AuthService(out), data[1]);
                 }
@@ -54,13 +54,15 @@ public class Server {
     }
 
 
-            public static void process(Action action, AuthService service,String data){
+            public static void process(Action action, AuthService service,String rawData){
+                String data = rawData.split(":")[1];
+                String[] args = data.split("-");
                 switch (action){
                     case USER:
-                        service.checkingUsername(data);
+                        service.checkingUsername(args[0]);
                         break;
                     case PASS:
-                        service.checkPassword(data);
+                        service.checkPassword(args[0], args[1]);
                         break;
                     case ECHO:
                         service.echo(data);

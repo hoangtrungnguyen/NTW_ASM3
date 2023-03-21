@@ -1,4 +1,4 @@
-package org.example.server;
+package org.example.client.model;
 
 public enum Action {
     USER,

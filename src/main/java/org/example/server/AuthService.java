@@ -9,9 +9,9 @@ import java.io.PrintWriter;
 
 public class AuthService {
 
-    boolean isLogin = false;
+    static boolean isLogin = false;
 
-    User user;
+    static User user;
     PrintWriter out;
     public AuthService(PrintWriter out){
         this.out = out;
@@ -28,7 +28,7 @@ public class AuthService {
                 System.out.println("Sent message not foudn");
                 return;
             }
-            this.user = user;
+            AuthService.user = user;
             out.println(Response.responseOk("User found"));
         } catch (InvalidUserNameException exception){
             out.println("OKay");
@@ -36,9 +36,14 @@ public class AuthService {
             out.println("not okay");
         }
     }
-    public void checkPassword(String password) {
+    public void checkPassword(String uname, String password)  {
         System.out.println("Server password: "+password);
-
+        User user = null;
+        try {
+            user = databaseHelper.getUserByUsername(uname);
+        } catch (InvalidUserNameException e) {
+            throw new RuntimeException(e);
+        }
         try{
             if(user.password.equals(password)){
                 isLogin = true;
